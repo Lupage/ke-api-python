@@ -1,0 +1,40 @@
+import requests
+import csv
+
+keywords = []
+
+with open("<YOUR .TXT FILE>", "r") as file:
+    for element in file:
+        keywords.append(element.strip())
+
+my_data = {
+    'country': 'us',
+    'currency': 'usd',
+    'dataSource': 'gkp',
+    # can be csv file variable
+    'kw[]': keywords
+}
+my_headers = {
+    'Accept': 'application/json',
+    'Authorization': 'Bearer <YOUR API KEY>'
+}
+response = requests.post(
+    'https://api.keywordseverywhere.com/v1/get_keyword_data', data=my_data, headers=my_headers)
+
+keywords_data = response.json()['data']
+
+# Working. For loop function since keywords_data is a list under the dicti
+vol = []
+cpc = []
+for element in keywords_data:
+    vol.append(element["vol"])
+    cpc.append(element["cpc"]["value"])
+
+rows = zip(keywords, vol, cpc)
+
+with open("<YOUR .CSV FILE>", "w", newline="") as file:
+    columns = ["Keywords", "Search Volume", "CPC"]
+    writer = csv.writer(file)
+    writer.writerow(columns)
+    for row in rows:
+        writer.writerow(row)
